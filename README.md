@@ -2,7 +2,7 @@
 
 This project demonstrates how to deploy and configure an AWS API Gateway with multiple stages (UAT1, UAT2) using Terraform. It implements both header-based routing through an Application Load Balancer (ALB) and path-based routing directly to the API Gateway stages.
 
-![Architecture Diagram](./diagrams/architecture_diagram.png)
+<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/architecture_diagram.png" alt="Architecture Diagram">
 
 ## Features
 
@@ -35,25 +35,25 @@ The architecture consists of the following components:
 
 The following diagram shows the current deployment architecture:
 
-![Deployment Diagram](./diagrams/deployment_diagram.png)
+<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/deployment_diagram.png" alt="Deployment Diagram">
 
 ### Detailed Infrastructure
 
 For a more detailed view of all AWS resources and their interconnections:
 
-![Detailed Infrastructure](./diagrams/detailed_infrastructure.png)
+<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/detailed_infrastructure.png" alt="Detailed Infrastructure">
 
 ### Request Flow
 
 This diagram illustrates how requests flow through the system:
 
-![Request Flow](./diagrams/request_flow.png)
+<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/request_flow.png" alt="Request Flow">
 
 ### Enhanced Production Architecture
 
 For production use cases, we recommend extending the architecture with additional AWS services:
 
-![Enhanced Deployment](./diagrams/enhanced_deployment_diagram.png)
+<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/enhanced_deployment_diagram.png" alt="Enhanced Deployment">
 
 ## Prerequisites
 
@@ -124,7 +124,7 @@ curl -H "X-Environment: UAT2" http://<alb-dns>/hello
 
 The following diagram illustrates the different test scenarios supported:
 
-![Test Scenarios](./diagrams/test_scenarios.png)
+<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/test_scenarios.png" alt="Test Scenarios">
 
 ## Diagrams
 

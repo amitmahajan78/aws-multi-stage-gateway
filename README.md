@@ -49,6 +49,25 @@ This diagram illustrates how requests flow through the system:
 
 <img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/request_flow.png" alt="Request Flow">
 
+### User Request Flow with Headers and Paths
+
+The following diagram provides a comprehensive view of how user requests with different headers and paths are routed through the system:
+
+<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/user_request_flow.png" alt="User Request Flow">
+
+This diagram shows:
+- Default requests (no header) route to UAT1
+- Requests with `X-Environment: UAT2` header route to UAT2
+- Path-based requests to `/uat1/*` route to UAT1
+- Path-based requests to `/uat2/*` route to UAT2
+- Direct API Gateway access for each stage
+
+### Detailed Request Flow
+
+For a more detailed technical view of the request routing logic:
+
+<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/detailed_request_flow.png" alt="Detailed Request Flow">
+
 ### Enhanced Production Architecture
 
 For production use cases, we recommend extending the architecture with additional AWS services:
@@ -136,6 +155,8 @@ The `diagrams` directory contains visual documentation of the architecture:
 - `test_scenarios.png`: Illustrations of different test cases
 - `deployment_diagram.png`: Current deployment architecture
 - `enhanced_deployment_diagram.png`: Enhanced architecture for production
+- `user_request_flow.png`: User-focused view of request routing with different headers and paths
+- `detailed_request_flow.png`: Technical detail of request routing logic
 
 ## Contributing
 

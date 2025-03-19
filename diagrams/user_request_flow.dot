@@ -1,0 +1,90 @@
+digraph UserRequestFlow {
+    rankdir=TB;
+    node [shape=box, style="rounded,filled", fillcolor=lightblue, fontname="Arial", fontsize=12];
+    edge [fontname="Arial", fontsize=10];
+    
+    // Title
+    labelloc="t";
+    label="User Request Flow: UAT1 and UAT2 Environments";
+    fontsize=20;
+    fontname="Arial Bold";
+    
+    // User and requests
+    User [label="User / Client\n(Browser/Curl)", shape=circle, fillcolor=lightgreen, width=1.5];
+    
+    // Request types (examples)
+    subgraph cluster_requests {
+        label="Request Examples";
+        style=filled;
+        fillcolor=lightyellow;
+        
+        Request1 [label="Default Request\ncurl http://alb-dns/hello"];
+        Request2 [label="UAT2 Header Request\ncurl -H \"X-Environment: UAT2\" http://alb-dns/hello"];
+        Request3 [label="UAT1 Path Request\ncurl http://alb-dns/uat1/hello"];
+        Request4 [label="UAT2 Path Request\ncurl http://alb-dns/uat2/hello"];
+        Request5 [label="Direct API Gateway UAT1\ncurl https://api-id.execute-api.region.amazonaws.com/uat1/hello"];
+        Request6 [label="Direct API Gateway UAT2\ncurl https://api-id.execute-api.region.amazonaws.com/uat2/hello"];
+    }
+    
+    // AWS Services
+    ALB [label="Application Load Balancer", fillcolor=orange, width=2];
+    
+    // API Gateway stages
+    APIGW_UAT1 [label="API Gateway\nUAT1 Stage", fillcolor=skyblue, width=2];
+    APIGW_UAT2 [label="API Gateway\nUAT2 Stage", fillcolor=skyblue, width=2];
+    
+    // Backend
+    Backend_UAT1 [label="Backend Service\n(httpbin.org/uat1)", fillcolor=lightpink];
+    Backend_UAT2 [label="Backend Service\n(httpbin.org/uat2)", fillcolor=lightpink];
+    
+    // Connect user to all request types
+    User -> Request1;
+    User -> Request2;
+    User -> Request3;
+    User -> Request4;
+    User -> Request5;
+    User -> Request6;
+    
+    // Routing through ALB
+    Request1 -> ALB [label="Default route"];
+    Request2 -> ALB [label="With X-Environment header"];
+    Request3 -> ALB [label="Path-based routing"];
+    Request4 -> ALB [label="Path-based routing"];
+    
+    // Direct API Gateway access bypasses ALB
+    Request5 -> APIGW_UAT1 [label="Direct access"];
+    Request6 -> APIGW_UAT2 [label="Direct access"];
+    
+    // ALB routing logic
+    ALB -> APIGW_UAT1 [label="Default or /uat1/* path or\nX-Environment: UAT1"];
+    ALB -> APIGW_UAT2 [label="/uat2/* path or\nX-Environment: UAT2"];
+    
+    // API Gateway to backend
+    APIGW_UAT1 -> Backend_UAT1 [label="HTTP_PROXY integration"];
+    APIGW_UAT2 -> Backend_UAT2 [label="HTTP_PROXY integration"];
+    
+    // Response paths (dashed blue lines)
+    Backend_UAT1 -> APIGW_UAT1 [label="Response", color=blue, style=dashed];
+    Backend_UAT2 -> APIGW_UAT2 [label="Response", color=blue, style=dashed];
+    
+    APIGW_UAT1 -> ALB [label="Response", color=blue, style=dashed];
+    APIGW_UAT2 -> ALB [label="Response", color=blue, style=dashed];
+    
+    ALB -> User [label="Response", color=blue, style=dashed];
+    
+    // Direct responses
+    APIGW_UAT1 -> User [label="Direct response", color=blue, style=dashed];
+    APIGW_UAT2 -> User [label="Direct response", color=blue, style=dashed];
+    
+    // Subgraph for routing rules explanation
+    subgraph cluster_routing_rules {
+        label="Routing Logic";
+        style=filled;
+        fillcolor=lightgrey;
+        
+        Rule1 [label="Default Route\n→ UAT1"];
+        Rule2 [label="Header-based\nX-Environment: UAT2\n→ UAT2"];
+        Rule3 [label="Path-based\n/uat1/*\n→ UAT1"];
+        Rule4 [label="Path-based\n/uat2/*\n→ UAT2"];
+    }
+} 

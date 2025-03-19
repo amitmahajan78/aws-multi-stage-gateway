@@ -1,0 +1,80 @@
+digraph DetailedRequestFlow {
+    rankdir=LR;
+    node [shape=box, style="rounded,filled", fillcolor=lightblue, fontname="Arial", fontsize=12];
+    edge [fontname="Arial", fontsize=10];
+    
+    // Define nodes with better labels
+    User [label="User / Client", shape=circle, fillcolor=lightgreen];
+    Internet [label="Internet", shape=cloud, fillcolor=lightyellow];
+    ALB [label="Application Load Balancer", fillcolor=orange];
+    
+    // Define API Gateway stages
+    subgraph cluster_api_gateway {
+        label="API Gateway";
+        style=filled;
+        fillcolor=lightyellow;
+        
+        APIGW_UAT1 [label="API Gateway\nUAT1 Stage\n(/uat1)"];
+        APIGW_UAT2 [label="API Gateway\nUAT2 Stage\n(/uat2)"];
+    }
+    
+    // Define backend integration
+    Backend [label="Backend\n(httpbin.org)", fillcolor=lightpink];
+    
+    // Define routing rules
+    subgraph cluster_routing_rules {
+        label="ALB Routing Rules";
+        style=filled;
+        fillcolor=lightgrey;
+        
+        HeaderUAT1 [label="Default Route\n(No header or X-Environment: UAT1)"];
+        HeaderUAT2 [label="Header-based Route\n(X-Environment: UAT2)"];
+        PathUAT1 [label="Path-based Route\n(/uat1/*)"];
+        PathUAT2 [label="Path-based Route\n(/uat2/*)"];
+    }
+    
+    // Flow connections
+    User -> Internet [label="HTTP Request"];
+    Internet -> ALB [label="Forward Request"];
+    
+    // Header-based routing flows
+    ALB -> HeaderUAT1 [label="1. No header\nor X-Environment: UAT1"];
+    ALB -> HeaderUAT2 [label="2. X-Environment: UAT2"];
+    
+    // Path-based routing flows
+    ALB -> PathUAT1 [label="3. Path starts with /uat1/"];
+    ALB -> PathUAT2 [label="4. Path starts with /uat2/"];
+    
+    // Routes to API Gateway
+    HeaderUAT1 -> APIGW_UAT1 [label="Route to UAT1"];
+    HeaderUAT2 -> APIGW_UAT2 [label="Route to UAT2"];
+    PathUAT1 -> APIGW_UAT1 [label="Route to UAT1"];
+    PathUAT2 -> APIGW_UAT2 [label="Route to UAT2"];
+    
+    // API Gateway to Backend
+    APIGW_UAT1 -> Backend [label="HTTP_PROXY Integration\n(uat1/endpoint)"];
+    APIGW_UAT2 -> Backend [label="HTTP_PROXY Integration\n(uat2/endpoint)"];
+    
+    // Response flow
+    Backend -> APIGW_UAT1 [label="Response", style="dashed", color="blue"];
+    Backend -> APIGW_UAT2 [label="Response", style="dashed", color="blue"];
+    APIGW_UAT1 -> ALB [label="Response", style="dashed", color="blue"];
+    APIGW_UAT2 -> ALB [label="Response", style="dashed", color="blue"];
+    ALB -> Internet [label="Response", style="dashed", color="blue"];
+    Internet -> User [label="Response", style="dashed", color="blue"];
+    
+    // Example request flows
+    {rank=same; User Example1 [label="Example 1:\ncurl http://ALB_DNS/hello", shape=note, fillcolor=lightyellow]; }
+    {rank=same; User Example2 [label="Example 2:\ncurl -H \"X-Environment: UAT2\" http://ALB_DNS/hello", shape=note, fillcolor=lightyellow]; }
+    {rank=same; User Example3 [label="Example 3:\ncurl http://ALB_DNS/uat1/hello", shape=note, fillcolor=lightyellow]; }
+    {rank=same; User Example4 [label="Example 4:\ncurl http://ALB_DNS/uat2/hello", shape=note, fillcolor=lightyellow]; }
+    
+    // Direct API Gateway Access
+    {rank=same; User Example5 [label="Example 5:\ncurl https://API_ID.execute-api.REGION.amazonaws.com/uat1/hello", shape=note, fillcolor=lightyellow]; }
+    {rank=same; User Example6 [label="Example 6:\ncurl https://API_ID.execute-api.REGION.amazonaws.com/uat2/hello", shape=note, fillcolor=lightyellow]; }
+    
+    // Add labels for the diagram
+    label = "Detailed Request Flow for UAT1 and UAT2 Environments";
+    fontsize = 20;
+    fontname = "Arial Bold";
+} 

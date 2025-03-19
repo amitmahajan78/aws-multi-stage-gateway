@@ -1,0 +1,47 @@
+digraph "Test Scenarios" {
+    // Diagram settings
+    rankdir=LR;
+    fontname="Helvetica,Arial,sans-serif";
+    node [fontname="Helvetica,Arial,sans-serif", fontsize=12, shape=box, style=filled, fillcolor=white];
+    edge [fontname="Helvetica,Arial,sans-serif", fontsize=10];
+    
+    // Define nodes
+    client [label="Test Client", shape=circle, fillcolor="#D5E8D4"];
+    
+    subgraph cluster_aws {
+        label="AWS Infrastructure";
+        style=filled;
+        color=lightgrey;
+        fillcolor="#F9F9F9";
+        
+        alb [label="Application Load Balancer", fillcolor="#DAE8FC"];
+        
+        subgraph cluster_api_gateways {
+            label="API Gateways";
+            style=filled;
+            color=lightgrey;
+            fillcolor="#E1D5E7";
+            
+            api_uat1 [label="UAT1 API Gateway"];
+            api_uat2 [label="UAT2 API Gateway"];
+        }
+    }
+    
+    backend [label="httpbin.org", shape=circle, fillcolor="#FFF2CC"];
+    
+    // Define edges - Test Scenarios
+    client -> api_uat1 [label="Test 1: Direct API Access\ncurl UAT1_ENDPOINT/hello", color="#66B2FF"];
+    client -> api_uat2 [label="Test 2: Direct API Access\ncurl UAT2_ENDPOINT/hello", color="#66B2FF"];
+    
+    client -> alb [label="Test 3: ALB Default Route\ncurl ALB_DNS/hello", color="#FF9999"];
+    client -> alb [label="Test 4: ALB with Header\ncurl -H \"x-env: uat2\" ALB_DNS/hello", color="#FF9999"];
+    
+    client -> alb [label="Test 5: Path-based Route\ncurl ALB_DNS/uat1/test", color="#99CC00"];
+    client -> alb [label="Test 6: Path-based Route\ncurl ALB_DNS/uat2/test", color="#99CC00"];
+    
+    alb -> api_uat1 [label="Redirect to UAT1", color="#FF9999"];
+    alb -> api_uat2 [label="Redirect to UAT2", color="#FF9999"];
+    
+    api_uat1 -> backend [label="Proxy Request"];
+    api_uat2 -> backend [label="Proxy Request"];
+} 

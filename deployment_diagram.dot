@@ -1,0 +1,146 @@
+digraph "AWS API Gateway with ALB Routing - Deployment" {
+    // Diagram settings
+    rankdir=TB;
+    fontname="Helvetica,Arial,sans-serif";
+    node [fontname="Helvetica,Arial,sans-serif", fontsize=12, shape=box, style=filled, fillcolor=white, margin=0.3];
+    edge [fontname="Helvetica,Arial,sans-serif", fontsize=10];
+    concentrate=true;
+    splines=ortho;
+    
+    // Define nodes
+    client [label="Client\nApplication", shape=ellipse, fillcolor="#D5E8D4", style="filled"];
+    
+    subgraph cluster_aws {
+        label="AWS Cloud Infrastructure";
+        style=filled;
+        color=lightgrey;
+        fillcolor="#F9F9F9";
+        
+        // VPC Components
+        subgraph cluster_vpc {
+            label="VPC";
+            style=filled;
+            color=lightgrey;
+            fillcolor="#F0F8FF";
+            
+            vpc [label="VPC\nCIDR: 10.0.0.0/16", shape=box3d, fillcolor="#DAE8FC"];
+            
+            subgraph cluster_public_subnets {
+                label="Public Subnets";
+                style=filled;
+                color=lightgrey;
+                fillcolor="#EAF2FA";
+                
+                public_subnet1 [label="Public Subnet 1\nCIDR: 10.0.101.0/24\nAZ: eu-west-1a", fillcolor="#CCE5FF"];
+                public_subnet2 [label="Public Subnet 2\nCIDR: 10.0.102.0/24\nAZ: eu-west-1b", fillcolor="#CCE5FF"];
+            }
+            
+            subgraph cluster_private_subnets {
+                label="Private Subnets";
+                style=filled;
+                color=lightgrey;
+                fillcolor="#F2EAFA";
+                
+                private_subnet1 [label="Private Subnet 1\nCIDR: 10.0.1.0/24\nAZ: eu-west-1a", fillcolor="#DAD2E9"];
+                private_subnet2 [label="Private Subnet 2\nCIDR: 10.0.2.0/24\nAZ: eu-west-1b", fillcolor="#DAD2E9"];
+            }
+            
+            igw [label="Internet Gateway", shape=box, fillcolor="#DAE8FC"];
+            nat [label="NAT Gateway", shape=box, fillcolor="#DAE8FC"];
+            route_table_public [label="Public Route Table\nRoute to IGW", shape=folder, fillcolor="#FFFFFF"];
+            route_table_private [label="Private Route Table\nRoute to NAT", shape=folder, fillcolor="#FFFFFF"];
+            
+            // Security Groups
+            alb_sg [label="ALB Security Group\nInbound: 80 from 0.0.0.0/0\nOutbound: All to 0.0.0.0/0", shape=box, fillcolor="#FFE6CC"];
+            endpoint_sg [label="API GW Endpoint SG\nInbound: 443 from ALB SG\nOutbound: All to 0.0.0.0/0", shape=box, fillcolor="#FFE6CC"];
+        }
+        
+        // Load Balancer
+        alb [label="Application Load Balancer\nListener: HTTP/80\nRedirect to API GWs", shape=box, fillcolor="#DAE8FC"];
+        
+        // API Gateway VPC Endpoint
+        api_endpoint [label="Execute-API VPC Endpoint\nPrivate DNS Enabled: true\nService: execute-api", shape=box, fillcolor="#DAE8FC"];
+        
+        // API Gateways
+        subgraph cluster_api_gateways {
+            label="API Gateway HTTP APIs";
+            style=filled;
+            color=lightgrey;
+            fillcolor="#F0FFF0";
+            
+            api_uat1 [label="API Gateway (UAT1)\nHTTP_PROXY Integration\nCORS Enabled", shape=box, fillcolor="#D5E8D4"];
+            api_uat2 [label="API Gateway (UAT2)\nHTTP_PROXY Integration\nCORS Enabled", shape=box, fillcolor="#D5E8D4"];
+        }
+        
+        // ALB Routing
+        subgraph cluster_alb_routing {
+            label="ALB Routing Rules";
+            style=filled;
+            color=lightgrey;
+            fillcolor="#FFF4E8";
+            
+            alb_default_rule [label="Default Action\nRedirect to UAT1 API", shape=box, fillcolor="#FFE6CC"];
+            alb_header_rule [label="Header Rule\nx-env: uat2\nRedirect to UAT2 API", shape=box, fillcolor="#FFE6CC"];
+            alb_path_rule_uat1 [label="Path Rule\n/uat1/*\nRedirect to UAT1 API", shape=box, fillcolor="#FFE6CC"];
+            alb_path_rule_uat2 [label="Path Rule\n/uat2/*\nRedirect to UAT2 API", shape=box, fillcolor="#FFE6CC"];
+        }
+    }
+    
+    // External service
+    backend [label="httpbin.org\nExternal Service", shape=ellipse, fillcolor="#FFF2CC", style="filled"];
+    
+    // Define connections
+    client -> igw [label="HTTP Request"];
+    igw -> public_subnet1 [label="Route"];
+    igw -> public_subnet2 [label="Route"];
+    
+    public_subnet1 -> route_table_public [style="dashed"];
+    public_subnet2 -> route_table_public [style="dashed"];
+    route_table_public -> igw [style="dashed", label="0.0.0.0/0"];
+    
+    private_subnet1 -> route_table_private [style="dashed"];
+    private_subnet2 -> route_table_private [style="dashed"];
+    route_table_private -> nat [style="dashed", label="0.0.0.0/0"];
+    
+    public_subnet1 -> alb;
+    public_subnet2 -> alb;
+    
+    alb -> alb_default_rule [style="dashed"];
+    alb -> alb_header_rule [style="dashed"];
+    alb -> alb_path_rule_uat1 [style="dashed"];
+    alb -> alb_path_rule_uat2 [style="dashed"];
+    
+    alb_default_rule -> api_uat1 [label="Redirect", style="dotted", color="blue"];
+    alb_header_rule -> api_uat2 [label="Redirect", style="dotted", color="blue"];
+    alb_path_rule_uat1 -> api_uat1 [label="Redirect", style="dotted", color="blue"];
+    alb_path_rule_uat2 -> api_uat2 [label="Redirect", style="dotted", color="blue"];
+    
+    alb -> alb_sg [style="dashed"];
+    alb_sg -> endpoint_sg [style="dashed"];
+    endpoint_sg -> api_endpoint [style="dashed"];
+    
+    api_endpoint -> private_subnet1;
+    api_endpoint -> private_subnet2;
+    
+    private_subnet1 -> nat;
+    private_subnet2 -> nat;
+    nat -> public_subnet1;
+    
+    api_uat1 -> backend [label="HTTP Proxy"];
+    api_uat2 -> backend [label="HTTP Proxy"];
+    
+    // Terraform resources and modules labels
+    vpc_module [label="Terraform Module:\nterraform-aws-modules/vpc/aws", shape=note, fillcolor="#E6F0FF"];
+    api_gateway_module [label="Terraform Module:\n./modules/api_gateway_mock", shape=note, fillcolor="#E6F0FF"];
+    alb_routing_module [label="Terraform Module:\n./modules/alb_header_routing", shape=note, fillcolor="#E6F0FF"];
+    
+    // Connect resources to modules
+    vpc_module -> vpc [style="dashed", color="gray"];
+    api_gateway_module -> api_uat1 [style="dashed", color="gray"];
+    api_gateway_module -> api_uat2 [style="dashed", color="gray"];
+    alb_routing_module -> alb [style="dashed", color="gray"];
+    alb_routing_module -> alb_default_rule [style="dashed", color="gray"];
+    alb_routing_module -> alb_header_rule [style="dashed", color="gray"];
+    alb_routing_module -> alb_path_rule_uat1 [style="dashed", color="gray"];
+    alb_routing_module -> alb_path_rule_uat2 [style="dashed", color="gray"];
+} 

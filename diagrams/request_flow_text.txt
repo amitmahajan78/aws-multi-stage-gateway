@@ -1,0 +1,34 @@
+
+    Request Flow - No Header or x-env:uat1
+    =====================================
+    
+    Client --[1. HTTP Request]--> ALB --[2. Evaluate Rules]--> Default Rule
+        |                                                           |
+        |                                                           v
+        |                             API Gateway VPC <-- [3. No x-env header] 
+        |                                |                 or x-env: uat1
+        |                                v
+        |                            API Gateway
+        |                                |
+        |                                v
+        |                            UAT1 Stage
+        |                                |
+        <-------[5. Response]------------+
+    
+    
+    Request Flow - With x-env:uat2 Header
+    ====================================
+    
+    Client --[1. HTTP Request with x-env:uat2]--> ALB --[2. Evaluate Rules]--> Header Rule
+        |                                                                        |
+        |                                                                        v
+        |                                API Gateway VPC <-- [3. x-env: uat2]
+        |                                     |
+        |                                     v
+        |                                 API Gateway
+        |                                     |
+        |                                     v
+        |                                 UAT2 Stage
+        |                                     |
+        <-------[5. Response]-----------------|
+    

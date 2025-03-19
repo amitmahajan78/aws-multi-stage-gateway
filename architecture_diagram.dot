@@ -1,0 +1,39 @@
+digraph "AWS API Gateway with ALB Routing" {
+    // Diagram settings
+    rankdir=TB;
+    fontname="Helvetica,Arial,sans-serif";
+    node [fontname="Helvetica,Arial,sans-serif", fontsize=12, shape=box, style=filled, fillcolor=white];
+    edge [fontname="Helvetica,Arial,sans-serif", fontsize=10];
+    
+    // Define nodes
+    client [label="Client Application", shape=circle, fillcolor="#D5E8D4"];
+    
+    // ALB
+    alb [label="Application Load Balancer", fillcolor="#DAE8FC"];
+    
+    subgraph cluster_api_gateways {
+        label="API Gateways";
+        style=filled;
+        color=lightgrey;
+        fillcolor="#F5F5F5";
+        
+        api_uat1 [label="API Gateway (UAT1)"];
+        api_uat2 [label="API Gateway (UAT2)"];
+    }
+    
+    subgraph cluster_backend {
+        label="External Backend";
+        style=filled;
+        color=lightgrey;
+        fillcolor="#FFF2CC";
+        
+        backend [label="httpbin.org"];
+    }
+    
+    // Define edges
+    client -> alb [label="HTTP Request"];
+    alb -> api_uat1 [label="Header x-env: uat1\nor Path /uat1/*"];
+    alb -> api_uat2 [label="Header x-env: uat2\nor Path /uat2/*"];
+    api_uat1 -> backend [label="HTTP Proxy"];
+    api_uat2 -> backend [label="HTTP Proxy"];
+} 

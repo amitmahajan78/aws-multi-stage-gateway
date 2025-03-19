@@ -1,0 +1,32 @@
+digraph "Request Flow" {
+    // Diagram settings
+    rankdir=LR;
+    fontname="Helvetica,Arial,sans-serif";
+    node [fontname="Helvetica,Arial,sans-serif", fontsize=12, shape=box, style=filled, fillcolor=white];
+    edge [fontname="Helvetica,Arial,sans-serif", fontsize=10];
+    
+    // Define nodes
+    client [label="Client", shape=circle, fillcolor="#D5E8D4"];
+    alb [label="ALB", fillcolor="#DAE8FC"];
+    api_uat1 [label="API GW - UAT1", fillcolor="#E1D5E7"];
+    api_uat2 [label="API GW - UAT2", fillcolor="#E1D5E7"];
+    backend [label="httpbin.org", shape=circle, fillcolor="#FFF2CC"];
+    
+    // Define edges - Direct API Access
+    client -> api_uat1 [label="1a. Direct access to UAT1\nGET /hello", color="#66B2FF"];
+    client -> api_uat2 [label="1b. Direct access to UAT2\nGET /hello", color="#66B2FF"];
+    
+    // Define edges - ALB Header Routing
+    client -> alb [label="2a. Default Route\nGET /hello", color="#FF9999"];
+    client -> alb [label="2b. Header Routing\nGET /hello + header x-env: uat2", color="#FF9999"];
+    alb -> api_uat1 [label="3a. Redirect (302)\nto UAT1", color="#FF9999"];
+    alb -> api_uat2 [label="3b. Redirect (302)\nto UAT2", color="#FF9999"];
+    
+    // Define edges - Path-based Routing
+    client -> alb [label="4a. Path-based\nGET /uat1/test", color="#99CC00"];
+    client -> alb [label="4b. Path-based\nGET /uat2/test", color="#99CC00"];
+    
+    // Define edges - Backend Requests
+    api_uat1 -> backend [label="5a. Proxy to backend", color="#FFCC00"];
+    api_uat2 -> backend [label="5b. Proxy to backend", color="#FFCC00"];
+} 

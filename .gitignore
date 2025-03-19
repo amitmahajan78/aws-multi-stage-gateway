@@ -1,0 +1,140 @@
+# Terraform files
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate.*
+.terragrunt-cache/
+.terraform.d/
+crash.log
+terraform.rc
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local .terraform directories
+**/.terraform/*
+
+# Local environment files
+.env
+.envrc
+.bash
+.zshrc
+.bash_history
+.zsh_history
+
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+.ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+.npm/
+.yarn/
+.pnp.*
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# AWS Lambda deployment packages
+*.zip
+proxy_lambda.zip
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Generated diagrams (include only the source files in version control)
+diagrams/*.png
+diagrams_venv/
+
+# Cursor-specific files and directories
+.cursor/
+.cursorrules
+
+# Application-specific temporary files
+*.bak
+*.backup
+*.orig
+*.old
+*.tmp
+
+# Operating system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+._*
+.Spotlight-V100
+.Trashes
+
+# Certificate and credential files (NEVER commit these)
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+*.p7b
+*.p7r
+*.spc
+*.gpg
+*.jks
+*.keystore
+*id_rsa*
+*id_ed25519*
+*.gpg
+*.asc
+*.topsecret
+
+# Other files to exclude
+scratch/
+example.tfvars
+terraform.tfvars
+*.auto.tfvars
+*secrets*
+*Secret*
+*SECRET*
+*credentials*
+*Credentials*
+*CREDENTIALS*
+
+# Keep these files (negate previous patterns)
+!example.tfvars.example
+!terraform.tfvars.example
+!.gitignore
+!.gitkeep 

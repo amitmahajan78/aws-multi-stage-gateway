@@ -1,0 +1,98 @@
+digraph "Detailed AWS Infrastructure" {
+    // Diagram settings
+    rankdir=TB;
+    fontname="Helvetica,Arial,sans-serif";
+    node [fontname="Helvetica,Arial,sans-serif", fontsize=11, shape=box, style=filled, fillcolor=white];
+    edge [fontname="Helvetica,Arial,sans-serif", fontsize=9];
+    
+    // Client
+    client [label="Client Application", shape=circle, fillcolor="#D5E8D4"];
+    
+    subgraph cluster_aws {
+        label="AWS Cloud";
+        style=filled;
+        color=lightgrey;
+        fillcolor="#F9F9F9";
+        
+        subgraph cluster_vpc {
+            label="VPC";
+            style=filled;
+            color=lightgrey;
+            fillcolor="#F5F5F5";
+            
+            // Internet Gateway
+            igw [label="Internet Gateway", fillcolor="#DAE8FC"];
+            
+            subgraph cluster_public_subnets {
+                label="Public Subnets";
+                style=filled;
+                color=lightgrey;
+                fillcolor="#EAF2FA";
+                
+                public_subnet1 [label="Public Subnet 1"];
+                public_subnet2 [label="Public Subnet 2"];
+                nat [label="NAT Gateway"];
+            }
+            
+            subgraph cluster_private_subnets {
+                label="Private Subnets";
+                style=filled;
+                color=lightgrey;
+                fillcolor="#F2EAFA";
+                
+                private_subnet1 [label="Private Subnet 1"];
+                private_subnet2 [label="Private Subnet 2"];
+            }
+            
+            subgraph cluster_security_groups {
+                label="Security Groups";
+                style=filled;
+                color=lightgrey;
+                fillcolor="#FFF0F0";
+                
+                alb_sg [label="ALB Security Group"];
+                endpoint_sg [label="API GW Endpoint SG"];
+            }
+            
+            // Load Balancer
+            alb [label="Application Load Balancer", fillcolor="#DAE8FC"];
+            
+            // VPC Endpoint
+            api_endpoint [label="Execute-API VPC Endpoint"];
+        }
+        
+        subgraph cluster_api_gateway {
+            label="API Gateway Service";
+            style=filled;
+            color=lightgrey;
+            fillcolor="#F0FFF0";
+            
+            api_uat1 [label="API Gateway (UAT1)"];
+            api_uat2 [label="API Gateway (UAT2)"];
+        }
+    }
+    
+    // External Backend
+    backend [label="httpbin.org", shape=circle, fillcolor="#FFF2CC"];
+    
+    // Define edges
+    client -> igw [label="HTTP Request"];
+    igw -> public_subnet1;
+    public_subnet1 -> alb;
+    
+    alb -> alb_sg [label="Security\nGroup"];
+    alb_sg -> endpoint_sg;
+    endpoint_sg -> api_endpoint [label="HTTPS (443)"];
+    
+    api_endpoint -> private_subnet1 [label="Private\nConnection"];
+    private_subnet1 -> api_uat1 [label="API Request"];
+    private_subnet1 -> api_uat2 [label="API Request"];
+    
+    api_uat1 -> backend [label="HTTP Proxy"];
+    api_uat2 -> backend [label="HTTP Proxy"];
+    
+    private_subnet1 -> nat;
+    nat -> public_subnet1;
+    public_subnet1 -> igw;
+    igw -> backend [label="Internet Access"];
+} 

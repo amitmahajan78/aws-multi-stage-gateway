@@ -68,11 +68,42 @@ For a more detailed technical view of the request routing logic:
 
 <img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/detailed_request_flow.png" alt="Detailed Request Flow">
 
-### Enhanced Production Architecture
+## Terraform Resource Creation Sequence
 
-For production use cases, we recommend extending the architecture with additional AWS services:
+The infrastructure is deployed in a logical sequence by Terraform, following dependency requirements. Here's how the resources are created:
 
-<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/enhanced_deployment_diagram.png" alt="Enhanced Deployment">
+### 1. Networking Resources (VPC Module)
+   - **VPC**: Creates the base network container
+   - **Subnets**: Creates public and private subnets across multiple AZs
+   - **Internet Gateway**: Enables internet access for the public subnets
+   - **Route Tables**: Configures routing for public and private subnets
+   - **NAT Gateway**: Enables outbound internet access for private subnets
+
+### 2. API Gateway Resources (api_gateway_mock Module)
+   - **API Gateway**: Creates the HTTP API Gateway instance
+   - **API Gateway Stages**: Creates UAT1 and UAT2 stages with auto-deployment
+   - **API Gateway Integrations**: Sets up HTTP_PROXY integrations with httpbin.org
+   - **API Gateway Routes**: Configures the routes with the correct paths (/hello)
+
+### 3. Load Balancing Resources (alb_header_routing Module)
+   - **Security Groups**: Creates security groups for the ALB and target groups
+   - **Load Balancer**: Creates the Application Load Balancer in public subnets
+   - **Target Groups**: Creates target groups for each environment (UAT1, UAT2)
+   - **Listeners**: Sets up HTTP listeners on the ALB
+   - **Listener Rules**: Creates rules for header-based and path-based routing
+   - **Target Group Attachments**: Associates the API Gateway endpoints with target groups
+
+### 4. Routing Configuration
+   - **Header-based Rules**: Creates rules to route traffic based on the X-Environment header
+   - **Path-based Rules**: Creates rules to route traffic based on URL path patterns
+   - **Default Route**: Configures the default route to direct to UAT1
+
+### 5. Health Check Configuration
+   - Configures health checks for each target group
+   - Sets appropriate health check paths (/uat1/hello, /uat2/hello)
+   - Configures health check intervals and thresholds
+
+This sequence ensures that dependencies are properly resolved, with networking infrastructure created first, followed by the API Gateway and finally the load balancing components that connect everything together.
 
 ## Prerequisites
 
@@ -154,7 +185,6 @@ The `diagrams` directory contains visual documentation of the architecture:
 - `request_flow.png`: Visualization of request paths through the system
 - `test_scenarios.png`: Illustrations of different test cases
 - `deployment_diagram.png`: Current deployment architecture
-- `enhanced_deployment_diagram.png`: Enhanced architecture for production
 - `user_request_flow.png`: User-focused view of request routing with different headers and paths
 - `detailed_request_flow.png`: Technical detail of request routing logic
 

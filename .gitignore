@@ -77,7 +77,6 @@ temp/
 .temp/
 
 # Generated diagrams (include only the source files in version control)
-diagrams/*.png
 diagrams_venv/
 
 # Cursor-specific files and directories

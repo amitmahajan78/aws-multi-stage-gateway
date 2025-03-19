@@ -2,7 +2,7 @@
 
 This project demonstrates how to deploy and configure an AWS API Gateway with multiple stages (UAT1, UAT2) using Terraform. It implements both header-based routing through an Application Load Balancer (ALB) and path-based routing directly to the API Gateway stages.
 
-<img src="./diagrams/architecture_diagram.png" alt="Architecture Diagram">
+<img src="https://github.com/amitmahajan78/aws-multi-stage-gateway/raw/main/diagrams/architecture_diagram.png" alt="Architecture Diagram">
 
 ## Features
 
